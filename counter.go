@@ -40,11 +40,11 @@ func (ac *AtomicCounter) Inc_NotSafe(key string) {
 }
 
 func (ac *AtomicCounter) Inc(key string) {
-	val, loaded := ac.data.LoadOrStore(key, atomic.NewInt64(0))
-	_ = loaded
-	var counter = val.(*atomic.Int64)
-	counter.Add(1)
-	ac.data.Store(key, counter)
+	val, _ := ac.data.LoadOrStore(key, atomic.NewInt64(0))
+	val.(*atomic.Int64).Inc()
+
+	// no need to set pointer again
+	//ac.data.Store(key, counter)
 }
 
 func (ac *AtomicCounter) GetCounterMap() map[string]int64 {

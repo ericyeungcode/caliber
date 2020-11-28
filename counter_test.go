@@ -27,15 +27,18 @@ func runCounterTest(cntr ConcurrentCounter, t *testing.T) {
 
 	var wg sync.WaitGroup
 	wg.Add(totalCall)
+	ready := make(chan struct{})
 	for i := 0; i < totalCall; i++ {
 
 		key := keyList[rand.Intn(numKey)]
 		go func() {
+			<-ready
 			cntr.Inc(key)
 			wg.Done()
 		}()
 	}
 
+	close(ready) // trigger multiple go routines to start working
 	wg.Wait()
 
 	chkTotal := 0
@@ -66,7 +69,8 @@ func runCounterBench(cntr ConcurrentCounter, b *testing.B) {
 	}
 }
 
-// BenchmarkAtomicCounter_Inc-12    	 4754733	       237 ns/op
+// BenchmarkAtomicCounter_Inc-12    	10284536	       120 ns/op
+// after removal of "ac.data.Store(key, counter)", op time from 237 ns/op => 120 ns/op
 func BenchmarkAtomicCounter_Inc(b *testing.B) {
 	runCounterBench(NewAtomicCounter(), b)
 }
