@@ -9,15 +9,20 @@ import (
 	"testing"
 )
 
+func MakeKeys() []string {
+	var keyList []string
+	for idx := 0; idx < 10; idx++ {
+		keyList = append(keyList, RandStringN(10))
+	}
+	return keyList
+}
+
 func runCounterTest(cntr ConcurrentCounter, t *testing.T) {
 	totalCall := 100000
 
 	defer ShowElapsedTime("totalCall:%v, counter:%v", totalCall, reflect.TypeOf(cntr))()
 
-	var keyList []string
-	for idx := 0; idx < 10; idx++ {
-		keyList = append(keyList, RandStringN(10))
-	}
+	keyList := MakeKeys()
 	numKey := len(keyList)
 
 	var wg sync.WaitGroup
@@ -43,9 +48,31 @@ func runCounterTest(cntr ConcurrentCounter, t *testing.T) {
 }
 
 func TestAtomicCounter_Inc(t *testing.T) {
-	runCounterTest(&AtomicCounter{}, t)
+	runCounterTest(NewAtomicCounter(), t)
 }
 
 func TestMutexCounter_Inc(t *testing.T) {
 	runCounterTest(NewMutexCounter(), t)
+}
+
+func runCounterBench(cntr ConcurrentCounter, b *testing.B) {
+	keyList := MakeKeys()
+	numKey := len(keyList)
+
+	for i := 0; i < b.N; i++ {
+		key := keyList[rand.Intn(numKey)]
+		cntr.Inc(key)
+
+	}
+}
+
+// BenchmarkAtomicCounter_Inc-12    	 4754733	       237 ns/op
+func BenchmarkAtomicCounter_Inc(b *testing.B) {
+	runCounterBench(NewAtomicCounter(), b)
+}
+
+// on MacOs, CUP i7, RAM 16G, mutex counter works better..
+//BenchmarkMutexCounter_Inc-12    	18508624	        67.5 ns/op
+func BenchmarkMutexCounter_Inc(b *testing.B) {
+	runCounterBench(NewMutexCounter(), b)
 }
