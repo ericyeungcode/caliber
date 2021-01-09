@@ -13,10 +13,10 @@ func NewHttpClientWithTimeout(dur time.Duration) *http.Client {
 	}
 }
 
-func DoHttp(client *http.Client, method string, url string, headers map[string]string, body io.Reader) ([]byte, error) {
+func DoHttp(client *http.Client, method string, url string, headers map[string]string, body io.Reader) (int, []byte, error) {
 	request, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	for k, v := range headers {
@@ -26,19 +26,19 @@ func DoHttp(client *http.Client, method string, url string, headers map[string]s
 	resp, err := client.Do(request)
 
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	defer func() { _ = resp.Body.Close() }()
 
 	buf, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
-	return buf, nil
+	return resp.StatusCode, buf, nil
 }
 
-func DoHttpGet(client *http.Client, url string, headers map[string]string) ([]byte, error) {
+func DoHttpGet(client *http.Client, url string, headers map[string]string) (int, []byte, error) {
 	return DoHttp(client, http.MethodGet, url, headers, nil)
 }
