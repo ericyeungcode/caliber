@@ -15,10 +15,6 @@ func ShowElapsedTime(format string, args ...interface{}) func() {
 	}
 }
 
-func GetMilli() int64 {
-	return time.Now().UnixNano() / 1000000
-}
-
 func TimeToTimestamp(t *time.Time) int64 {
 	return t.UnixNano() / 1000000
 }

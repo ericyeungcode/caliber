@@ -1,11 +1,14 @@
-package caliber
+package db_utils
 
 import (
 	"fmt"
+	"github.com/ericyeungcode/caliber"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"reflect"
 	"time"
 
-	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -24,27 +27,35 @@ func GetDbUrl(user, pass, host, defaultDb string) string {
 		user, pass, host, defaultDb)
 }
 
-func GetGormDbV1(user, pass, host, defaultDb string) *gorm.DB {
-	return SetupDb(GetDbUrl(user, pass, host, defaultDb))
-}
+func ConnectMysql(dsn string, maxConn int) *gorm.DB {
 
-func SetupDb(url string) *gorm.DB {
-	return SetupDbWithLog(url, true)
-}
-
-func SetupDbWithLog(url string, useDefaultLog bool) *gorm.DB {
-	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return "t_" + defaultTableName
+	connectConfig := &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   "t_",
+			SingularTable: false,
+			NameReplacer:  nil,
+			NoLowerCase:   false,
+		},
+		//Logger: logger.New(),
 	}
 
 	var err error
-	db, err := gorm.Open("mysql", url)
+	db, err := gorm.Open(mysql.Open(dsn), connectConfig)
+
 	log.Infof("db = %v, err=%+v", db, err)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	db.SingularTable(true)
+	rawDb, err := db.DB()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	rawDb.SetMaxIdleConns(maxConn)
+	rawDb.SetMaxOpenConns(maxConn)
+	rawDb.SetConnMaxLifetime(6 * time.Hour)
+	rawDb.SetConnMaxIdleTime(1 * time.Hour)
 
 	// 默认的 db.Debug():
 	// 打印 SELECT count(*) FROM t_order WHERE (user_id = '8088')
@@ -52,9 +63,9 @@ func SetupDbWithLog(url string, useDefaultLog bool) *gorm.DB {
 	// 加上 db.SetLogger(log.StandardLogger()) 后
 	// 打印 SELECT count(*) FROM t_order WHERE (user_id = ?) [8088]
 
-	if !useDefaultLog {
-		db.SetLogger(log.StandardLogger())
-	}
+	//if !useDefaultLog {
+	//	db.set(log.StandardLogger())
+	//}
 
 	return db
 }
@@ -63,10 +74,11 @@ func AsyncFetchDb(querier *gorm.DB, outItems interface{}) chan *AsyncDbResult {
 
 	outC := make(chan *AsyncDbResult, 1)
 	go func() {
-		// do we need to defer close channel and why
+		// do we need to defer close channel and why?
+		// to tell `for ... := range outC` to finish loop
 		//defer close(outC)
 
-		defer ShowElapsedTime(fmt.Sprintf("AsyncFetchDb gofunc(): outItems type = %v", reflect.TypeOf(outItems)))()
+		defer caliber.ShowElapsedTime(fmt.Sprintf("AsyncFetchDb gofunc(): outItems type = %v", reflect.TypeOf(outItems)))()
 
 		err := querier.Debug().Find(outItems).Error
 		outC <- &AsyncDbResult{

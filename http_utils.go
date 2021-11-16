@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type HttpRespData struct {
+type RestResponse struct {
 	StatusCode  int
 	RespHeader  *http.Header
 	RespContent []byte
@@ -19,7 +19,7 @@ func NewHttpClientWithTimeout(dur time.Duration) *http.Client {
 	}
 }
 
-func DoHttp(client *http.Client, method string, url string, headers map[string]string, body io.Reader) (*HttpRespData, error) {
+func DoHttp(client *http.Client, method string, url string, headers map[string]string, body io.Reader) (*RestResponse, error) {
 	request, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -42,13 +42,13 @@ func DoHttp(client *http.Client, method string, url string, headers map[string]s
 		return nil, err
 	}
 
-	return &HttpRespData{
+	return &RestResponse{
 		StatusCode:  resp.StatusCode,
 		RespHeader:  &resp.Header,
 		RespContent: buf,
 	}, nil
 }
 
-func DoHttpGet(client *http.Client, url string, headers map[string]string) (*HttpRespData, error) {
+func DoHttpGet(client *http.Client, url string, headers map[string]string) (*RestResponse, error) {
 	return DoHttp(client, http.MethodGet, url, headers, nil)
 }
