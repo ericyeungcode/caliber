@@ -6,10 +6,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func StructToStr(v interface{}) string {
+func Marshal(v interface{}) []byte {
 	buf, err := json.Marshal(v)
 	if err != nil {
 		log.Panic(err)
 	}
-	return string(buf)
+	return buf
+}
+
+func MarshalStr(v interface{}) string {
+	return string(Marshal(v))
+}
+
+func UnMarshalStr(data string, v interface{}) {
+	err := json.Unmarshal([]byte(data), v)
+	if err != nil {
+		log.Panic(err)
+	}
 }
