@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Marshal(v interface{}) []byte {
+func Marshal(v any) []byte {
 	buf, err := json.Marshal(v)
 	if err != nil {
 		log.Panic(err)
@@ -14,11 +14,11 @@ func Marshal(v interface{}) []byte {
 	return buf
 }
 
-func MarshalStr(v interface{}) string {
+func MarshalStr(v any) string {
 	return string(Marshal(v))
 }
 
-func UnMarshalStr(data string, v interface{}) {
+func UnMarshalStr(data string, v any) {
 	err := json.Unmarshal([]byte(data), v)
 	if err != nil {
 		log.Panic(err)

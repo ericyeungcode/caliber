@@ -2,12 +2,13 @@ package db_utils
 
 import (
 	"fmt"
+	"reflect"
+	"time"
+
 	"github.com/ericyeungcode/caliber"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"reflect"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -17,7 +18,7 @@ import (
 //////////////////////////////
 
 type AsyncDbResult struct {
-	Data interface{}
+	Data any
 	Err  error
 }
 
@@ -28,7 +29,6 @@ func GetDbUrl(user, pass, host, defaultDb string) string {
 }
 
 func ConnectMysql(dsn string, maxConn int) *gorm.DB {
-
 	connectConfig := &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "t_",
@@ -70,7 +70,7 @@ func ConnectMysql(dsn string, maxConn int) *gorm.DB {
 	return db
 }
 
-func AsyncFetchDb(querier *gorm.DB, outItems interface{}) chan *AsyncDbResult {
+func AsyncFetchDb(querier *gorm.DB, outItems any) chan *AsyncDbResult {
 
 	outC := make(chan *AsyncDbResult, 1)
 	go func() {
