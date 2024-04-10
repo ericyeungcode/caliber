@@ -67,12 +67,12 @@ func DoHttp(client *http.Client, method string, url string, headers map[string]s
 /*
 DoHttpData send http request and parse whole response into value `data`
 */
-func DoHttpData(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, data any) error {
+func DoHttpData(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, ptrOutput any) error {
 	buRsp, err := DoHttp(client, method, url, headers, jsonBodyStr)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(buRsp.Buffer, &data)
+	err = json.Unmarshal(buRsp.Buffer, ptrOutput)
 	if err != nil {
 		return fmt.Errorf("DoHttpData fail to unmarshal data %v, err:%+v", string(buRsp.Buffer), err.Error())
 	}
@@ -80,13 +80,13 @@ func DoHttpData(client *http.Client, method string, url string, headers map[stri
 }
 
 /*
-DoHttpEx send http request and parse payload (extract `RawResponse.Data`)
+DoHttpBizPayload send http request and parse payload (extract `BizResp.Data`)
 Useful to parse business object inside response
 */
-func DoHttpPayload(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, output interface{}) error {
+func DoHttpBizPayload(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, ptrOutput any) error {
 	buRsp, err := DoHttp(client, method, url, headers, jsonBodyStr)
 	if err != nil {
 		return err
 	}
-	return ParseCommonPayload(buRsp.Buffer, &output)
+	return ParseBizPayload(buRsp.Buffer, ptrOutput)
 }

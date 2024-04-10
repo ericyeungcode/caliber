@@ -2,8 +2,9 @@ package caliber
 
 import (
 	"fmt"
-	"go.uber.org/atomic"
 	"sync"
+
+	"go.uber.org/atomic"
 )
 
 // concurrent counter
@@ -12,9 +13,9 @@ type ConcurrentCounter interface {
 	GetCounterMap() map[string]int64
 }
 
-////////////////////////////////////////
+// //////////////////////////////////////
 // AtomicCounter (syn.map + uber.atomic)
-////////////////////////////////////////
+// //////////////////////////////////////
 type AtomicCounter struct {
 	data sync.Map
 }
@@ -49,16 +50,16 @@ func (ac *AtomicCounter) Inc(key string) {
 
 func (ac *AtomicCounter) GetCounterMap() map[string]int64 {
 	result := make(map[string]int64)
-	ac.data.Range(func(key, value interface{}) bool {
+	ac.data.Range(func(key, value any) bool {
 		result[key.(string)] = (value.(*atomic.Int64)).Load()
 		return true
 	})
 	return result
 }
 
-////////////////////////////////////////
+// //////////////////////////////////////
 // MutexCounter (map + mutex)
-////////////////////////////////////////
+// //////////////////////////////////////
 type MutexCounter struct {
 	data  map[string]int64
 	mutex sync.Mutex

@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/ericyeungcode/caliber"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-
-	log "github.com/sirupsen/logrus"
 )
 
 //////////////////////////////

@@ -2,17 +2,19 @@ package caliber
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"reflect"
 	"sync"
 	"testing"
+
+	"github.com/ericyeungcode/caliber"
+	"github.com/stretchr/testify/assert"
 )
 
 func MakeKeys() []string {
 	var keyList []string
 	for idx := 0; idx < 10; idx++ {
-		keyList = append(keyList, RandStringN(10))
+		keyList = append(keyList, caliber.RandStringN(10))
 	}
 	return keyList
 }
@@ -20,7 +22,7 @@ func MakeKeys() []string {
 func runCounterTest(cntr ConcurrentCounter, t *testing.T) {
 	totalCall := 100000
 
-	defer ShowElapsedTime("totalCall:%v, counter:%v", totalCall, reflect.TypeOf(cntr))()
+	defer caliber.ShowElapsedTime("totalCall:%v, counter:%v", totalCall, reflect.TypeOf(cntr))()
 
 	keyList := MakeKeys()
 	numKey := len(keyList)
@@ -76,7 +78,7 @@ func BenchmarkAtomicCounter_Inc(b *testing.B) {
 }
 
 // on MacOs, CUP i7, RAM 16G, mutex counter works better..
-//BenchmarkMutexCounter_Inc-12    	18508624	        67.5 ns/op
+// BenchmarkMutexCounter_Inc-12    	18508624	        67.5 ns/op
 func BenchmarkMutexCounter_Inc(b *testing.B) {
 	runCounterBench(NewMutexCounter(), b)
 }

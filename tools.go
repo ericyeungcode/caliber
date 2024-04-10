@@ -1,9 +1,18 @@
 package caliber
 
-import "log"
+import (
+	"fmt"
+)
 
-func Assert(cond bool, format string, args ...interface{}) {
+func Assert(cond bool, format string, args ...any) {
 	if !cond {
-		log.Panicf(format, args...)
+		panic(fmt.Sprintf(format, args...))
 	}
+}
+
+func If[T any](condition bool, trueValue, falseValue T) T {
+	if condition {
+		return trueValue
+	}
+	return falseValue
 }
