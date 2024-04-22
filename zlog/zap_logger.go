@@ -18,14 +18,16 @@ func init() {
 	execName, _ := os.Executable()
 	appName := path.Base(execName)
 	if appName == "main" {
-		appName = fmt.Sprintf("go-run-%v", time.Now().Format("20060102T150405"))
+		appName = fmt.Sprintf("go-main-%v", time.Now().Format("20060102T150405"))
+
+		// appName = strings.ReplaceAll(execName, string(os.PathSeparator), "_")
 	}
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	dir := path.Join(homeDir, "go-app-logs")
+	dir := path.Join(homeDir, ".go-app-logs")
 	fmt.Println("dir = ", dir)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
