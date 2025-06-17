@@ -15,11 +15,11 @@ func ParseBizPayload(buf []byte, v any) error {
 	var bizResp BizResp
 
 	if err := json.Unmarshal(buf, &bizResp); err != nil {
-		return fmt.Errorf("ParseCommonPayload fail to unmarshal raw buffer %v, err:%+v", string(buf), err.Error())
+		return fmt.Errorf("ParseBizPayload fail to unmarshal raw buffer %v, err:%+v", string(buf), err.Error())
 	}
 
 	if bizResp.Code != 0 {
-		return fmt.Errorf("ParseCommonPayload: errCode=%v, errMsg=%v", bizResp.Code, bizResp.Message)
+		return fmt.Errorf("ParseBizPayload: errCode:%v, errMsg:%v", bizResp.Code, bizResp.Message)
 	}
 
 	if bizResp.Data == nil {
@@ -29,7 +29,7 @@ func ParseBizPayload(buf []byte, v any) error {
 	}
 
 	if err := json.Unmarshal(*bizResp.Data, v); err != nil {
-		return fmt.Errorf("ParseCommonPayload fail to unmarshal payload, resp = %+v", bizResp)
+		return fmt.Errorf("ParseBizPayload fail to unmarshal payload, resp = %+v", bizResp)
 	}
 
 	return nil

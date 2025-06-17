@@ -1,11 +1,12 @@
 module github.com/ericyeungcode/caliber
 
-go 1.22
+go 1.24
 
 require (
 	github.com/segmentio/kafka-go v0.4.8
+	github.com/shopspring/decimal v1.4.0
 	github.com/sirupsen/logrus v1.7.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.10.0
 	go.uber.org/atomic v1.3.2
 	go.uber.org/zap v1.27.0
 	gorm.io/driver/mysql v1.2.0

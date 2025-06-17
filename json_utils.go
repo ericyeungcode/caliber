@@ -4,21 +4,34 @@ import (
 	"encoding/json"
 )
 
-func Marshal(v any) []byte {
+func Marshal(v any) ([]byte, error) {
 	buf, err := json.Marshal(v)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return buf
+	return buf, nil
 }
 
-func MarshalStr(v any) string {
-	return string(Marshal(v))
+func MarshalStr(v any) (string, error) {
+	buf, err := Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(buf), nil
 }
 
-func UnMarshalStr(data string, v any) {
-	err := json.Unmarshal([]byte(data), v)
+func MustMarshalStr(v any) string {
+	str, err := MarshalStr(v)
 	if err != nil {
 		panic(err)
 	}
+	return str
+}
+
+func UnMarshalStr(data string, v any) error {
+	err := json.Unmarshal([]byte(data), v)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -80,10 +80,10 @@ func DoHttpData(client *http.Client, method string, url string, headers map[stri
 }
 
 /*
-DoHttpBizPayload send http request and parse payload (extract `BizResp.Data`)
+DoHttpPayload send http request and parse payload (extract `BizResp.Data`)
 Useful to parse business object inside response
 */
-func DoHttpBizPayload(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, ptrOutput any) error {
+func DoHttpPayload(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, ptrOutput any) error {
 	buRsp, err := DoHttp(client, method, url, headers, jsonBodyStr)
 	if err != nil {
 		return err

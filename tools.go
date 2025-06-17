@@ -16,3 +16,7 @@ func If[T any](condition bool, trueValue, falseValue T) T {
 	}
 	return falseValue
 }
+
+func NewValuePtr[T any](v T) *T {
+	return &v
+}

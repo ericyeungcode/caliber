@@ -2,24 +2,13 @@ package db_utils
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 
-	"github.com/ericyeungcode/caliber"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
-
-//////////////////////////////
-// Async result
-//////////////////////////////
-
-type AsyncDbResult struct {
-	Data any
-	Err  error
-}
 
 func GetDbUrl(user, pass, host, defaultDb string) string {
 	return fmt.Sprintf(
@@ -27,7 +16,7 @@ func GetDbUrl(user, pass, host, defaultDb string) string {
 		user, pass, host, defaultDb)
 }
 
-func ConnectMysql(dsn string, maxConn int) *gorm.DB {
+func ConnectMysqlDsn(dsn string, maxConn int) *gorm.DB {
 	connectConfig := &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "t_",
@@ -69,37 +58,6 @@ func ConnectMysql(dsn string, maxConn int) *gorm.DB {
 	return db
 }
 
-func AsyncFetchDb(querier *gorm.DB, outItems any) chan *AsyncDbResult {
-
-	outC := make(chan *AsyncDbResult, 1)
-	go func() {
-		// do we need to defer close channel and why?
-		// to tell `for ... := range outC` to finish loop
-		//defer close(outC)
-
-		defer caliber.ShowElapsedTime(fmt.Sprintf("AsyncFetchDb gofunc(): outItems type = %v", reflect.TypeOf(outItems)))()
-
-		err := querier.Debug().Find(outItems).Error
-		outC <- &AsyncDbResult{
-			Data: outItems,
-			Err:  err,
-		}
-	}()
-
-	return outC
-}
-
-func RecvAsyncResult(resultC chan *AsyncDbResult, waitSeconds int) *AsyncDbResult {
-	var result *AsyncDbResult
-	select {
-	case r := <-resultC:
-		result = r
-	case <-time.After(time.Second * time.Duration(waitSeconds)):
-		result = &AsyncDbResult{
-			Data: nil,
-			Err:  fmt.Errorf("AsyncFetchDb timeout"),
-		}
-	}
-
-	return result
+func ConnectMysql(user, pass, host, defaultDb string, maxConn int) *gorm.DB {
+	return ConnectMysqlDsn(GetDbUrl(user, pass, host, defaultDb), maxConn)
 }
