@@ -22,13 +22,19 @@ func ResponseToString(rsp *Response) string {
 	return fmt.Sprintf("[status_code=%v, buffer=%v]", rsp.StatusCode, string(rsp.Buffer))
 }
 
+type ApiResponse[T any] struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    T      `json:"data"`
+}
+
 func NewHttpClientWithTimeout(dur time.Duration) *http.Client {
 	return &http.Client{
 		Timeout: dur,
 	}
 }
 
-func DoHttp(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*Response, error) {
+func HttpRequest(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*Response, error) {
 	var body io.Reader = nil
 
 	if jsonBodyStr != "" {
@@ -64,29 +70,16 @@ func DoHttp(client *http.Client, method string, url string, headers map[string]s
 	}, nil
 }
 
-/*
-DoHttpData send http request and parse whole response into value `data`
-*/
-func DoHttpData(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, ptrOutput any) error {
-	buRsp, err := DoHttp(client, method, url, headers, jsonBodyStr)
+func HttpRequestAndParse[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*T, error) {
+	buRsp, err := HttpRequest(client, method, url, headers, jsonBodyStr)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	err = json.Unmarshal(buRsp.Buffer, ptrOutput)
-	if err != nil {
-		return fmt.Errorf("DoHttpData fail to unmarshal data %v, err:%+v", string(buRsp.Buffer), err.Error())
-	}
-	return nil
-}
 
-/*
-DoHttpPayload send http request and parse payload (extract `BizResp.Data`)
-Useful to parse business object inside response
-*/
-func DoHttpPayload(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string, ptrOutput any) error {
-	buRsp, err := DoHttp(client, method, url, headers, jsonBodyStr)
+	var x T
+	err = json.Unmarshal(buRsp.Buffer, &x)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("DoHttpData fail to unmarshal data %v, err:%+v", string(buRsp.Buffer), err.Error())
 	}
-	return ParseBizPayload(buRsp.Buffer, ptrOutput)
+	return &x, nil
 }
