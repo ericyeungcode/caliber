@@ -10,22 +10,6 @@ import (
 	"github.com/ericyeungcode/caliber"
 )
 
-const (
-	SubTypeSubscribe = "subscribe"
-)
-
-type SubReq struct {
-	Type        string   `json:"type"`
-	Instruments []string `json:"instruments"`
-	Channels    []string `json:"channels"`
-	Interval    string   `json:"interval"`
-}
-
-type PrivateSubSeq struct {
-	*SubReq
-	Token string `json:"token"`
-}
-
 func main() {
 	wsURL := "wss://betaws.bitexch.dev"
 
@@ -34,13 +18,13 @@ func main() {
 	})
 
 	client.OnOpen = func() {
-		var subscription = &SubReq{
-			Type:        SubTypeSubscribe,
-			Instruments: []string{"BTC-USDT-PERPETUAL"},
-			Channels:    []string{"order_book.10.10"},
-			Interval:    "raw",
+		var subscription = map[string]any{
+			"type":        "subscribe",
+			"instruments": []string{"BTC-USDT-PERPETUAL"},
+			"channels":    []string{"order_book.10.10"},
+			"interval":    "raw",
 		}
-		buf, err := json.Marshal(&subscription)
+		buf, err := json.Marshal(subscription)
 		if err != nil {
 			log.Println(err)
 			return
@@ -64,13 +48,6 @@ func main() {
 	if err := client.Connect(); err != nil {
 		log.Fatal("Failed to connect:", err)
 	}
-
-	// go func() {
-	// 	for {
-	// 		time.Sleep(3 * time.Second)
-	// 		client.Send("ping from client")
-	// 	}
-	// }()
 
 	// Wait for Ctrl+C
 	stop := make(chan os.Signal, 1)

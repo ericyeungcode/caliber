@@ -35,3 +35,12 @@ func UnMarshalStr(data string, v any) error {
 	}
 	return nil
 }
+
+func JsonToStructPtr[T any](jsonStr string) (*T, error) {
+	var v T
+	err := json.Unmarshal([]byte(jsonStr), &v)
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
+}
