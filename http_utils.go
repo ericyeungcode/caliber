@@ -84,6 +84,7 @@ func HttpRequestAndParsePtr[T any](client *http.Client, method string, url strin
 	return &x, nil
 }
 
+// To handle response like []*MyStruct, we don't want *[]*MyStruct
 func HttpRequestAndParse[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (T, error) {
 	val, err := HttpRequestAndParsePtr[T](client, method, url, headers, jsonBodyStr)
 	if err != nil {
