@@ -70,7 +70,7 @@ func HttpRequest(client *http.Client, method string, url string, headers map[str
 	}, nil
 }
 
-func HttpRequestAndParse[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*T, error) {
+func HttpRequestAndParsePtr[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*T, error) {
 	buRsp, err := HttpRequest(client, method, url, headers, jsonBodyStr)
 	if err != nil {
 		return nil, err
@@ -82,4 +82,13 @@ func HttpRequestAndParse[T any](client *http.Client, method string, url string, 
 		return nil, fmt.Errorf("DoHttpData fail to unmarshal data %v, err:%+v", string(buRsp.Buffer), err.Error())
 	}
 	return &x, nil
+}
+
+func HttpRequestAndParse[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (T, error) {
+	val, err := HttpRequestAndParsePtr[T](client, method, url, headers, jsonBodyStr)
+	if err != nil {
+		var zero T
+		return zero, err
+	}
+	return *val, nil
 }

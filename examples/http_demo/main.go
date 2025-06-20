@@ -19,11 +19,14 @@ type orderBookVo struct {
 
 func main() {
 	httpCli := &http.Client{Timeout: time.Second * 5}
+
+	// return obj (incur clone)
 	timeData, err := caliber.HttpRequestAndParse[caliber.ApiResponse[int64]](httpCli, http.MethodGet,
 		"https://api.bit.com/spot/v1/system/time", nil, "")
 	log.Printf("timeData: %+v, err:%v\n", timeData, err)
 
-	orderbook, err := caliber.HttpRequestAndParse[caliber.ApiResponse[orderBookVo]](httpCli, http.MethodGet,
+	// return pointer
+	orderbook, err := caliber.HttpRequestAndParsePtr[caliber.ApiResponse[orderBookVo]](httpCli, http.MethodGet,
 		"https://api.bit.com/spot/v1/orderbooks?pair=BTC-USDT", nil, "")
 	log.Printf("orderbook: %+v, err:%v\n", orderbook, err)
 }
