@@ -7,14 +7,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ericyeungcode/caliber"
+	"github.com/ericyeungcode/caliber/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func MakeKeys() []string {
 	var keyList []string
 	for idx := 0; idx < 10; idx++ {
-		keyList = append(keyList, caliber.RandStringN(10))
+		keyList = append(keyList, common.RandStringN(10))
 	}
 	return keyList
 }
@@ -22,7 +22,7 @@ func MakeKeys() []string {
 func runCounterTest(cntr ConcurrentCounter, t *testing.T) {
 	totalCall := 100000
 
-	defer caliber.ShowElapsedTime("totalCall:%v, counter:%v", totalCall, reflect.TypeOf(cntr))()
+	defer common.ShowElapsedTime("totalCall:%v, counter:%v", totalCall, reflect.TypeOf(cntr))()
 
 	keyList := MakeKeys()
 	numKey := len(keyList)

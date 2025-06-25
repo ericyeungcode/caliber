@@ -1,4 +1,6 @@
-package caliber
+package mapx
+
+import "github.com/ericyeungcode/caliber/slicex"
 
 // Set difference: a - b
 func SetDiff[K comparable, V1 any, V2 any](a map[K]V1, b map[K]V2) []K {
@@ -14,7 +16,7 @@ func SetDiff[K comparable, V1 any, V2 any](a map[K]V1, b map[K]V2) []K {
 // Set difference: a - b
 // input is array
 func SetDiffSlice[K comparable](a, b []K) []K {
-	x := ListToMap(a, func(v K) (K, struct{}) { return v, struct{}{} })
-	y := ListToMap(b, func(v K) (K, struct{}) { return v, struct{}{} })
+	x := slicex.ListToMap(a, func(v K) (K, struct{}) { return v, struct{}{} })
+	y := slicex.ListToMap(b, func(v K) (K, struct{}) { return v, struct{}{} })
 	return SetDiff(x, y)
 }

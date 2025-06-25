@@ -1,4 +1,6 @@
-package caliber
+package slicex
+
+import "github.com/ericyeungcode/caliber/common"
 
 func Transform[T, R any](xs []T, f func(T) R) []R {
 	ys := make([]R, len(xs))
@@ -105,7 +107,7 @@ func CapStr(v string, maxSize int) string {
 }
 
 func ChunkSlice[T any](items []T, chunkSize int) (chunks [][]T) {
-	Assert(chunkSize > 0, "ChunkSlice: chunkSize should be > 0")
+	common.Assert(chunkSize > 0, "ChunkSlice: chunkSize should be > 0")
 
 	count := len(items)
 	for i := 0; i < count; i += chunkSize {

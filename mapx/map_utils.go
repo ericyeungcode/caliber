@@ -1,4 +1,4 @@
-package caliber
+package mapx
 
 // func MapKeys[K comparable, V any](m map[K]V) []K {
 // 	keys := make([]K, len(m))

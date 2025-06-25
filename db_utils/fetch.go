@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ericyeungcode/caliber"
+	"github.com/ericyeungcode/caliber/common"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +26,7 @@ func AsyncFetchDb(querier *gorm.DB, outItems any) chan *AsyncDbResult {
 		// to tell `for ... := range outC` to finish loop
 		//defer close(outC)
 
-		defer caliber.ShowElapsedTime("AsyncFetchDb gofunc(): outItems type = %v", reflect.TypeOf(outItems))()
+		defer common.ShowElapsedTime("AsyncFetchDb gofunc(): outItems type = %v", reflect.TypeOf(outItems))()
 
 		err := querier.Debug().Find(outItems).Error
 		outC <- &AsyncDbResult{

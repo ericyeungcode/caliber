@@ -7,13 +7,13 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/ericyeungcode/caliber"
+	"github.com/ericyeungcode/caliber/ws"
 )
 
 func main() {
 	wsURL := "wss://betaws.bitexch.dev"
 
-	client := caliber.NewWSClient(wsURL, &tls.Config{
+	client := ws.NewWSClient(wsURL, &tls.Config{
 		InsecureSkipVerify: true, // ⚠️ only for dev / testing
 	})
 

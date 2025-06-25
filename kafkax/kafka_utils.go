@@ -1,4 +1,4 @@
-package caliber
+package kafkax
 
 import (
 	"time"

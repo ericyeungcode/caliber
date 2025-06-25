@@ -1,4 +1,4 @@
-package caliber
+package ws
 
 import (
 	"crypto/tls"
