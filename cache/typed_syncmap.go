@@ -1,4 +1,4 @@
-package caliber
+package cache
 
 import (
 	"sync"
