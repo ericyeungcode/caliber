@@ -22,9 +22,9 @@ func AsyncFetchDb(querier *gorm.DB, outItems any) chan *AsyncDbResult {
 
 	outC := make(chan *AsyncDbResult, 1)
 	go func() {
-		// do we need to defer close channel and why?
-		// to tell `for ... := range outC` to finish loop
-		//defer close(outC)
+		// We need to defer close channel to prevent goroutine leaks
+		// and to tell `for ... := range outC` to finish loop
+		defer close(outC)
 
 		defer common.ShowElapsedTime("AsyncFetchDb gofunc(): outItems type = %v", reflect.TypeOf(outItems))()
 
