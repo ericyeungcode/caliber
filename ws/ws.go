@@ -140,7 +140,7 @@ func (c *WSClient) reconnect() {
 	defer c.reconnectingFlag.Store(0)
 
 	if c.conn != nil {
-		c.conn.Close()
+		_ = c.conn.Close()
 	}
 	if c.OnClose != nil {
 		c.OnClose()
@@ -175,7 +175,7 @@ func (c *WSClient) Close() {
 	c.closed.Store(true)
 	close(c.quit)
 	if c.conn != nil {
-		c.conn.Close()
+		_ = c.conn.Close()
 	}
 	if c.OnClose != nil {
 		c.OnClose()
