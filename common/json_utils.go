@@ -2,15 +2,17 @@ package common
 
 import (
 	"encoding/json"
+	"log"
 	"strings"
 )
 
-func MarshalStr(v any) (string, error) {
+func MustMarshalStr(v any) string {
 	buf, err := json.Marshal(v)
 	if err != nil {
-		return "", err
+		log.Panicf("json marshal error: %v\n", err)
+		return ""
 	}
-	return string(buf), nil
+	return string(buf)
 }
 
 // support struct, struct pointer (e.g. *image.Pointer), map, slice, etc.
