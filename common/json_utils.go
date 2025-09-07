@@ -2,45 +2,20 @@ package common
 
 import (
 	"encoding/json"
+	"strings"
 )
 
-func Marshal(v any) ([]byte, error) {
-	buf, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	return buf, nil
-}
-
 func MarshalStr(v any) (string, error) {
-	buf, err := Marshal(v)
+	buf, err := json.Marshal(v)
 	if err != nil {
 		return "", err
 	}
 	return string(buf), nil
 }
 
-func MustMarshalStr(v any) string {
-	str, err := MarshalStr(v)
-	if err != nil {
-		panic(err)
-	}
-	return str
-}
-
-func UnMarshalStr(data string, v any) error {
-	err := json.Unmarshal([]byte(data), v)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func JsonToStructPtr[T any](jsonStr string) (*T, error) {
-	var v T
-	err := json.Unmarshal([]byte(jsonStr), &v)
-	if err != nil {
-		return nil, err
-	}
-	return &v, nil
+// support struct, struct pointer (e.g. *image.Pointer), map, slice, etc.
+func JsonToValue[T any](s string) (T, error) {
+	var result T
+	err := json.NewDecoder(strings.NewReader(s)).Decode(&result)
+	return result, err
 }

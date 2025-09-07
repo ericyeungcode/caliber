@@ -2,11 +2,12 @@ package request
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/ericyeungcode/caliber/common"
 )
 
 type Response struct {
@@ -34,7 +35,7 @@ func NewHttpClientWithTimeout(dur time.Duration) *http.Client {
 	}
 }
 
-func HttpRequest(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*Response, error) {
+func HttpRequestRaw(client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*Response, error) {
 	var body io.Reader = nil
 
 	if jsonBodyStr != "" {
@@ -70,26 +71,20 @@ func HttpRequest(client *http.Client, method string, url string, headers map[str
 	}, nil
 }
 
-func HttpRequestAndParsePtr[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (*T, error) {
-	buRsp, err := HttpRequest(client, method, url, headers, jsonBodyStr)
-	if err != nil {
-		return nil, err
-	}
-
-	var x T
-	err = json.Unmarshal(buRsp.Buffer, &x)
-	if err != nil {
-		return nil, fmt.Errorf("DoHttpData fail to unmarshal data %v, err:%+v", string(buRsp.Buffer), err.Error())
-	}
-	return &x, nil
-}
-
-// To handle response like []*MyStruct, we don't want *[]*MyStruct
-func HttpRequestAndParse[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (T, error) {
-	val, err := HttpRequestAndParsePtr[T](client, method, url, headers, jsonBodyStr)
+func HttpRequest[T any](client *http.Client, method string, url string, headers map[string]string, jsonBodyStr string) (T, error) {
+	rawRsp, err := HttpRequestRaw(client, method, url, headers, jsonBodyStr)
 	if err != nil {
 		var zero T
 		return zero, err
 	}
-	return *val, nil
+
+	return common.JsonToValue[T](string(rawRsp.Buffer))
+}
+
+func HttpGet[T any](client *http.Client, url string) (T, error) {
+	return HttpRequest[T](client, http.MethodGet, url, nil, "")
+}
+
+func HttpPost[T any](client *http.Client, url string, headers map[string]string, jsonBodyStr string) (T, error) {
+	return HttpRequest[T](client, http.MethodPost, url, headers, jsonBodyStr)
 }

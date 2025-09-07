@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
-	"time"
 
 	"github.com/ericyeungcode/caliber/request"
 )
@@ -18,15 +16,9 @@ type orderBookVo struct {
 }
 
 func main() {
-	httpCli := &http.Client{Timeout: time.Second * 5}
-
-	// return obj (incur clone)
-	timeData, err := request.HttpRequestAndParse[request.ApiResponse[int64]](httpCli, http.MethodGet,
-		"https://api.bit.com/spot/v1/system/time", nil, "")
+	timeData, err := request.Get[*request.ApiResponse[int64]]("https://api.bit.com/spot/v1/system/time")
 	log.Printf("timeData: %+v, err:%v\n", timeData, err)
 
-	// return pointer
-	orderbook, err := request.HttpRequestAndParsePtr[request.ApiResponse[orderBookVo]](httpCli, http.MethodGet,
-		"https://api.bit.com/spot/v1/orderbooks?pair=BTC-USDT", nil, "")
+	orderbook, err := request.Get[*request.ApiResponse[orderBookVo]]("https://api.bit.com/spot/v1/orderbooks?pair=BTC-USDT")
 	log.Printf("orderbook: %+v, err:%v\n", orderbook, err)
 }

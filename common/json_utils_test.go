@@ -2,101 +2,56 @@ package common
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestJsonToStructPtr(t *testing.T) {
-	// Define a test struct type
-	type Person struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}
-
-	tests := []struct {
-		name      string
-		jsonStr   string
-		wantErr   bool
-		expected  *Person
-		expectNil bool
-	}{
-		{
-			name:    "valid json",
-			jsonStr: `{"name": "Alice", "age": 30}`,
-			wantErr: false,
-			expected: &Person{
-				Name: "Alice",
-				Age:  30,
-			},
-		},
-		{
-			name:      "invalid json",
-			jsonStr:   `{"name": "Bob", "age": "thirty"}`, // age should be number
-			wantErr:   true,
-			expectNil: true,
-		},
-		{
-			name:      "empty json",
-			jsonStr:   `{}`,
-			wantErr:   false,
-			expected:  &Person{},
-			expectNil: false,
-		},
-		{
-			name:      "malformed json",
-			jsonStr:   `{"name": "Charlie", "age": 40`, // missing closing brace
-			wantErr:   true,
-			expectNil: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := JsonToStructPtr[Person](tt.jsonStr)
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("JsonToStructPtr() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if tt.expectNil {
-				if got != nil {
-					t.Errorf("JsonToStructPtr() = %v, expected nil", got)
-				}
-				return
-			}
-
-			if got == nil {
-				t.Error("JsonToStructPtr() returned nil when expecting non-nil")
-				return
-			}
-
-			if !tt.wantErr {
-				if got.Name != tt.expected.Name || got.Age != tt.expected.Age {
-					t.Errorf("JsonToStructPtr() = %+v, expected %+v", got, tt.expected)
-				}
-			}
-		})
-	}
+type MyStruct struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
-func TestJsonToStructPtrWithDifferentType(t *testing.T) {
-	type Product struct {
-		ID    string  `json:"id"`
-		Price float64 `json:"price"`
-	}
+func TestJsonToValue(t *testing.T) {
+	t.Run("struct value", func(t *testing.T) {
+		input := `{"name":"Alice","age":30}`
+		got, err := JsonToValue[MyStruct](input)
 
-	jsonStr := `{"id": "123", "price": 19.99}`
-	got, err := JsonToStructPtr[Product](jsonStr)
-	if err != nil {
-		t.Errorf("JsonToStructPtr() unexpected error: %v", err)
-		return
-	}
+		require.NoError(t, err)
+		require.Equal(t, MyStruct{Name: "Alice", Age: 30}, got)
+	})
 
-	expected := &Product{
-		ID:    "123",
-		Price: 19.99,
-	}
+	t.Run("struct pointer", func(t *testing.T) {
+		input := `{"name":"Bob","age":25}`
+		got, err := JsonToValue[*MyStruct](input)
 
-	if got.ID != expected.ID || got.Price != expected.Price {
-		t.Errorf("JsonToStructPtr() = %+v, expected %+v", got, expected)
-	}
+		require.NoError(t, err)
+		require.NotNil(t, got)
+		require.Equal(t, &MyStruct{Name: "Bob", Age: 25}, got)
+	})
+
+	t.Run("map", func(t *testing.T) {
+		input := `{"foo":"bar","num":42}`
+		got, err := JsonToValue[map[string]any](input)
+
+		require.NoError(t, err)
+		require.Equal(t, map[string]any{
+			"foo": "bar",
+			"num": float64(42), // JSON numbers decode as float64
+		}, got)
+	})
+
+	t.Run("slice", func(t *testing.T) {
+		input := `[1,2,3]`
+		got, err := JsonToValue[[]int](input)
+
+		require.NoError(t, err)
+		require.Equal(t, []int{1, 2, 3}, got)
+	})
+
+	t.Run("invalid JSON", func(t *testing.T) {
+		input := `{"name": "Charlie", "age": }`
+		_, err := JsonToValue[MyStruct](input)
+
+		require.Error(t, err)
+	})
 }
