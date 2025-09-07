@@ -3,6 +3,7 @@ package common
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,4 +55,24 @@ func TestJsonToValue(t *testing.T) {
 
 		require.Error(t, err)
 	})
+}
+
+func Test2(t *testing.T) {
+
+	// struct can't be converted to string
+	t.Run("struct to string(expect failure)", func(t *testing.T) {
+		input := `{"name":"Alice","age":30}`
+		got, err := JsonToValue[string](input)
+		t.Logf("got: %+v, err:%v\n", got, err)
+		assert.Error(t, err)
+	})
+
+	// json string can be converted to go-string
+	t.Run("json to value(string)", func(t *testing.T) {
+		input := `"hello"`
+		got, err := JsonToValue[string](input)
+		t.Logf("got: %+v, err:%v\n", got, err)
+		assert.NoError(t, err)
+	})
+
 }

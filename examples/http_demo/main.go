@@ -21,4 +21,15 @@ func main() {
 
 	orderbook, err := request.Get[*request.ApiResponse[orderBookVo]]("https://api.bit.com/spot/v1/orderbooks?pair=BTC-USDT")
 	log.Printf("orderbook: %+v, err:%v\n", orderbook, err)
+
+	// Failed CASE:  this will produce error because orderbookStr is not json of string type
+	orderbookStr, err := request.Get[string]("https://api.bit.com/spot/v1/orderbooks?pair=BTC-USDT")
+	log.Printf("orderbook str1: %+v, err:%v\n", orderbookStr, err)
+	if err == nil {
+		panic("err should not be nil for GET[string]")
+	}
+
+	// make request and get raw string response (OK)
+	obRsp, err := request.HttpRequestRaw(request.GetNextHttpClient(), "GET", "https://api.bit.com/spot/v1/orderbooks?pair=BTC-USDT", nil, "")
+	log.Printf("orderbook str2: %+v, err:%v\n", request.ResponseToString(obRsp), err)
 }
