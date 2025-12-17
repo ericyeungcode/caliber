@@ -21,6 +21,14 @@ func NewAppError(code int, message string) *AppError {
 	}
 }
 
+func NewAppErrorf(code int, format string, args ...any) *AppError {
+	return &AppError{
+		Code:    code,
+		Message: fmt.Sprintf(format, args...),
+		Details: nil,
+	}
+}
+
 func NewAppErrorVars(code int, message string, details map[string]any) *AppError {
 	return &AppError{
 		Code:    code,
