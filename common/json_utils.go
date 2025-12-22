@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"log"
-	"strings"
 )
 
 func MustMarshalStr(v any) string {
@@ -18,6 +17,6 @@ func MustMarshalStr(v any) string {
 // support struct, struct pointer (e.g. *image.Pointer), map, slice, etc.
 func JsonToValue[T any](s string) (T, error) {
 	var result T
-	err := json.NewDecoder(strings.NewReader(s)).Decode(&result)
+	err := json.Unmarshal([]byte(s), &result)
 	return result, err
 }
