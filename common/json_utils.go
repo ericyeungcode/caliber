@@ -20,3 +20,9 @@ func JsonToValue[T any](s string) (T, error) {
 	err := json.Unmarshal([]byte(s), &result)
 	return result, err
 }
+
+func JsonByteToValue[T any](b []byte) (T, error) {
+	var result T
+	err := json.Unmarshal(b, &result)
+	return result, err
+}
