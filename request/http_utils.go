@@ -78,7 +78,7 @@ func HttpRequest[T any](client *http.Client, method string, url string, headers 
 		return zero, err
 	}
 
-	return common.JsonToValue[T](string(rawRsp.Buffer))
+	return common.JsonByteToValue[T](rawRsp.Buffer)
 }
 
 func HttpGet[T any](client *http.Client, url string) (T, error) {

@@ -11,7 +11,7 @@ const (
 )
 
 var httpClientList []*http.Client
-var clientIndex = &atomic.Uint32{}
+var clientIndex atomic.Uint64
 
 func init() {
 	for i := 0; i < cliCount; i++ {
@@ -20,7 +20,7 @@ func init() {
 }
 
 func GetNextHttpClient() *http.Client {
-	return httpClientList[int(clientIndex.Add(1))%cliCount]
+	return httpClientList[int(clientIndex.Add(1))%len(httpClientList)]
 }
 
 func Get[T any](url string) (T, error) {
