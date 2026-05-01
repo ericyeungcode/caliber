@@ -45,13 +45,13 @@ type AsyncDbResult struct {
 var users []User
 
 // Start async query
-resultChan := db_utils.AsyncFetchDb(db, &users)
+resultChan := dbx.AsyncFetchDb(db, &users)
 
 // Do other work while query runs
 fmt.Println("Query is running in background...")
 
 // Receive result with 5 second timeout
-result := db_utils.RecvAsyncResult(resultChan, 5)
+result := dbx.RecvAsyncResult(resultChan, 5)
 
 if result.Err != nil {
     log.Printf("Query failed: %v", result.Err)
@@ -73,10 +73,10 @@ var users []User
 query := db.Where("age > ?", 25).Order("name ASC")
 
 // Start async query
-resultChan := db_utils.AsyncFetchDb(query, &users)
+resultChan := dbx.AsyncFetchDb(query, &users)
 
 // Receive result
-result := db_utils.RecvAsyncResult(resultChan, 5)
+result := dbx.RecvAsyncResult(resultChan, 5)
 
 if result.Err != nil {
     log.Printf("Query failed: %v", result.Err)
@@ -92,12 +92,12 @@ if userData, ok := result.Data.(*[]User); ok {
 
 ```go
 // Start multiple async queries
-usersChan := db_utils.AsyncFetchDb(db, &[]User{})
-ordersChan := db_utils.AsyncFetchDb(db, &[]Order{})
+usersChan := dbx.AsyncFetchDb(db, &[]User{})
+ordersChan := dbx.AsyncFetchDb(db, &[]Order{})
 
 // Wait for both results
-userResult := db_utils.RecvAsyncResult(usersChan, 5)
-orderResult := db_utils.RecvAsyncResult(ordersChan, 5)
+userResult := dbx.RecvAsyncResult(usersChan, 5)
+orderResult := dbx.RecvAsyncResult(ordersChan, 5)
 
 // Process results
 if userResult.Err == nil {
@@ -119,10 +119,10 @@ if orderResult.Err == nil {
 var orders []Order
 
 // Start async query
-resultChan := db_utils.AsyncFetchDb(db, &orders)
+resultChan := dbx.AsyncFetchDb(db, &orders)
 
 // Try to receive with short timeout
-result := db_utils.RecvAsyncResult(resultChan, 1) // 1 second timeout
+result := dbx.RecvAsyncResult(resultChan, 1) // 1 second timeout
 
 if result.Err != nil {
     fmt.Printf("Query timed out or failed: %v\n", result.Err)
@@ -150,6 +150,6 @@ fmt.Println("Query completed successfully")
 ## See Also
 
 - Check the `examples/async_db_demo/main.go` for complete working examples
-- The `db_utils/generic.go` file contains additional database utilities like `AutoQuery` and `BuildStmt` 
+- The `dbx/generic.go` file contains additional database utilities like `AutoQuery` and `BuildStmt` 
 
 [cursor generated]

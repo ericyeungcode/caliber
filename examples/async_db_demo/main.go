@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ericyeungcode/caliber/db_utils"
+	"github.com/ericyeungcode/caliber/dbx"
 	"gorm.io/gorm"
 )
 
@@ -49,14 +49,14 @@ func simpleAsyncQuery(db *gorm.DB) {
 	var users []User
 
 	// Start async query
-	resultChan := db_utils.AsyncFetchDb(db, &users)
+	resultChan := dbx.AsyncFetchDb(db, &users)
 
 	// Do other work while query is running
 	fmt.Println("Query is running in background...")
 	time.Sleep(100 * time.Millisecond) // Simulate other work
 
 	// Receive result with 5 second timeout
-	result := db_utils.RecvAsyncResult(resultChan, 5)
+	result := dbx.RecvAsyncResult(resultChan, 5)
 
 	if result.Err != nil {
 		log.Printf("Query failed: %v", result.Err)
@@ -76,10 +76,10 @@ func asyncQueryWithTimeout(db *gorm.DB) {
 	var orders []Order
 
 	// Start async query
-	resultChan := db_utils.AsyncFetchDb(db, &orders)
+	resultChan := dbx.AsyncFetchDb(db, &orders)
 
 	// Try to receive with very short timeout (should timeout)
-	result := db_utils.RecvAsyncResult(resultChan, 1) // 1 second timeout
+	result := dbx.RecvAsyncResult(resultChan, 1) // 1 second timeout
 
 	if result.Err != nil {
 		fmt.Printf("Query timed out or failed: %v\n", result.Err)
@@ -91,12 +91,12 @@ func asyncQueryWithTimeout(db *gorm.DB) {
 
 func multipleConcurrentQueries(db *gorm.DB) {
 	// Start multiple async queries
-	usersChan := db_utils.AsyncFetchDb(db, &[]User{})
-	ordersChan := db_utils.AsyncFetchDb(db, &[]Order{})
+	usersChan := dbx.AsyncFetchDb(db, &[]User{})
+	ordersChan := dbx.AsyncFetchDb(db, &[]Order{})
 
 	// Wait for both results
-	userResult := db_utils.RecvAsyncResult(usersChan, 5)
-	orderResult := db_utils.RecvAsyncResult(ordersChan, 5)
+	userResult := dbx.RecvAsyncResult(usersChan, 5)
+	orderResult := dbx.RecvAsyncResult(ordersChan, 5)
 
 	// Process results
 	if userResult.Err == nil {
@@ -119,10 +119,10 @@ func asyncQueryWithConditions(db *gorm.DB) {
 	query := db.Where("age > ?", 25).Order("name ASC")
 
 	// Start async query with conditions
-	resultChan := db_utils.AsyncFetchDb(query, &users)
+	resultChan := dbx.AsyncFetchDb(query, &users)
 
 	// Receive result
-	result := db_utils.RecvAsyncResult(resultChan, 5)
+	result := dbx.RecvAsyncResult(resultChan, 5)
 
 	if result.Err != nil {
 		log.Printf("Query failed: %v", result.Err)
