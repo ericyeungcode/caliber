@@ -1,122 +1,130 @@
 package numx
 
+/*
+
+String to number Patterns: T is Int, UInt, Int64, UInt64, F, D (decimal)
+
+- ATo<T>
+- ATo<T>Empty
+- MustATo<T>
+
+Number to string Patterns: T is Int, UInt, Int64, UInt64, F, D (decimal)
+
+- <T>ToA
+
+*/
+
 import (
 	"fmt"
 	"strconv"
 
 	"github.com/shopspring/decimal"
-	log "github.com/sirupsen/logrus"
 )
-
-// /////////////////////////////////////////
-// format API output numbers
-// /////////////////////////////////////////
-
-const (
-	ApiOutputDecimalPlace = 8
-)
-
-var FloatFormat = fmt.Sprintf("%%.%vf", ApiOutputDecimalPlace)
-
-func DecimalToVoStr(value decimal.Decimal) string {
-	return value.StringFixed(ApiOutputDecimalPlace)
-}
-
-func DecimalToVoStrDefaultBlank(value decimal.Decimal) string {
-	if value.Equal(decimal.Zero) {
-		return ""
-	}
-	return value.StringFixed(ApiOutputDecimalPlace)
-}
-
-func FloatToVoStr(value float64) string {
-	return fmt.Sprintf(FloatFormat, value)
-}
 
 ///////////////////////////////////////////
-// string to int/int64/float64/decimal
+// convert strings to numbers
 ///////////////////////////////////////////
 
 func AToInt(s string) (int, error) {
-	val, err := strconv.Atoi(s)
-
-	if err != nil {
-		return 0, fmt.Errorf("Failed to convert integer: %v", s)
-	}
-
-	return val, nil
+	return strconv.Atoi(s)
 }
 
 func AToIntEmpty(s string) int {
 	val, err := strconv.Atoi(s)
-
 	if err != nil {
 		return 0
 	}
-
 	return val
 }
 
 func MustAToInt(s string) int {
 	val, err := AToInt(s)
 	if err != nil {
-		log.Panicf("Failed to parse [%v] to int", s)
+		panic(fmt.Sprintf("Failed to parse [%v] to int", s))
+	}
+	return val
+}
+
+func AToUInt(s string) (uint, error) {
+	val, err := strconv.ParseUint(s, 10, 0)
+	if err != nil {
+		return 0, err
+	}
+	return uint(val), nil
+}
+
+func AToUIntEmpty(s string) uint {
+	val, err := AToUInt(s)
+	if err != nil {
+		return 0
+	}
+	return val
+}
+
+func MustAToUInt(s string) uint {
+	val, err := AToUInt(s)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to parse [%v] to uint", s))
 	}
 	return val
 }
 
 func AToInt64(s string) (int64, error) {
-	val, err := strconv.ParseInt(s, 10, 64)
-
-	if err != nil {
-		return 0, fmt.Errorf("Failed to convert long: %v", s)
-	}
-
-	return val, nil
+	return strconv.ParseInt(s, 10, 64)
 }
 
 func AToInt64Empty(s string) int64 {
 	val, err := strconv.ParseInt(s, 10, 64)
-
 	if err != nil {
 		return 0
 	}
-
 	return val
 }
 
-func MustAToI64(s string) int64 {
+func MustAToInt64(s string) int64 {
 	val, err := AToInt64(s)
 	if err != nil {
-		log.Panicf("Failed to parse [%v] to int64", s)
+		panic(fmt.Sprintf("Failed to parse [%v] to int64", s))
+	}
+	return val
+}
+
+func AToUInt64(s string) (uint64, error) {
+	return strconv.ParseUint(s, 10, 64)
+}
+
+func AToUInt64Empty(s string) uint64 {
+	val, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return val
+}
+
+func MustAToUInt64(s string) uint64 {
+	val, err := AToUInt64(s)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to parse [%v] to uint64", s))
 	}
 	return val
 }
 
 func AToF(s string) (float64, error) {
-	val, err := strconv.ParseFloat(s, 64)
-
-	if err != nil {
-		return 0, fmt.Errorf("Failed to convert float64: %v", s)
-	}
-
-	return val, nil
+	return strconv.ParseFloat(s, 64)
 }
 
 func AToFEmpty(s string) float64 {
 	val, err := strconv.ParseFloat(s, 64)
-
 	if err != nil {
 		return 0
 	}
-
 	return val
 }
 
 func MustAToF(s string) float64 {
 	val, err := AToF(s)
 	if err != nil {
-		log.Panicf("Failed to parse [%v] to float64", s)
+		panic(fmt.Sprintf("Failed to parse [%v] to float64", s))
 	}
 	return val
 }
@@ -126,6 +134,12 @@ func AToD(s string) (decimal.Decimal, error) {
 }
 
 func AToDEmpty(s string) decimal.Decimal {
+	// Fast-path the common "" (not-populated) case: NewFromString("")
+	// would otherwise run the full parse and allocate an error before we
+	// discard it.
+	if s == "" {
+		return decimal.Zero
+	}
 	v, err := decimal.NewFromString(s)
 	if err != nil {
 		return decimal.Zero
@@ -136,21 +150,43 @@ func AToDEmpty(s string) decimal.Decimal {
 func MustAToD(s string) decimal.Decimal {
 	val, err := decimal.NewFromString(s)
 	if err != nil {
-		log.Panicf("Failed to parse [%v] to decimal", s)
+		panic(fmt.Sprintf("Failed to parse [%v] to decimal", s))
 	}
 	return val
 }
 
+// AToNullD parses s into a decimal.NullDecimal. Empty or malformed input
+// yields NullDecimal{Valid:false} (the nullable counterpart of AToDEmpty,
+// which collapses the same inputs to decimal.Zero).
+func AToNullD(s string) decimal.NullDecimal {
+	if s == "" {
+		return decimal.NullDecimal{}
+	}
+	v, err := decimal.NewFromString(s)
+	if err != nil {
+		return decimal.NullDecimal{}
+	}
+	return decimal.NewNullDecimal(v)
+}
+
 ///////////////////////////////////////////
-// int/int64/float64/decimal to string
+// convert numbers to strings
 ///////////////////////////////////////////
 
-func IToA(i int) string {
+func IntToA(i int) string {
 	return strconv.Itoa(i)
 }
 
-func I64ToA(i int64) string {
+func UIntToA(u uint) string {
+	return strconv.FormatUint(uint64(u), 10)
+}
+
+func Int64ToA(i int64) string {
 	return strconv.FormatInt(i, 10)
+}
+
+func UInt64ToA(u uint64) string {
+	return strconv.FormatUint(u, 10)
 }
 
 // to get formatted output, use FloatToVoStr()
@@ -173,19 +209,4 @@ func FToD(f float64) decimal.Decimal {
 
 func DToF(d decimal.Decimal) float64 {
 	return d.InexactFloat64()
-}
-
-// /////////////////////////////////////////
-// generic div
-type Number interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-		~float32 | ~float64
-}
-
-func Div[A, B Number](a A, b B) (float64, error) {
-	if float64(b) == 0 {
-		return 0, fmt.Errorf("division by zero")
-	}
-	return float64(a) / float64(b), nil
 }
